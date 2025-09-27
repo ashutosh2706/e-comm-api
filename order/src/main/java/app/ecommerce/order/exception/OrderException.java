@@ -1,8 +1,8 @@
 package app.ecommerce.order.exception;
 
-public class OrderException extends RuntimeException {
+public class OrderException extends Exception {
 
-    public OrderException(String exception) {
-        super(exception);
+    public OrderException(String message) {
+        super(message);
     }
 }
