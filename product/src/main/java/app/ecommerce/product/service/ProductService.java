@@ -74,6 +74,6 @@ public class ProductService {
     public List<ProductQueryResponse> queryProductsAvailability(List<Long> productIds) {
         List<Product> products = new ArrayList<>();
         productIds.forEach(id -> products.add(productRepo.findById(id).orElseThrow(() -> new EntityNotFoundException("No product found with id: "+id))));
-        return products.stream().map(product -> new ProductQueryResponse(product.getProductId(), product.getAvailable())).toList();
+        return products.stream().map(product -> new ProductQueryResponse(product.getProductId(), product.getAvailable(), product.getPrice())).toList();
     }
 }

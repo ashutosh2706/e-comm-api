@@ -2,6 +2,8 @@ package app.ecommerce.order.controller;
 
 import app.ecommerce.order.dto.order.OrderRequestDTO;
 import app.ecommerce.order.exception.CustomerServiceException;
+import app.ecommerce.order.exception.OrderException;
+import app.ecommerce.order.exception.ProductServiceException;
 import app.ecommerce.order.service.OrderService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,7 +23,7 @@ public class OrderController {
     private OrderService orderService;
 
     @PostMapping(value = "new", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<?> createOrder(@Valid @RequestBody OrderRequestDTO orderRequestDTO, @RequestHeader Map<String, String> headers) throws CustomerServiceException {
+    public ResponseEntity<?> createOrder(@Valid @RequestBody OrderRequestDTO orderRequestDTO, @RequestHeader Map<String, String> headers) throws CustomerServiceException, ProductServiceException, OrderException {
         return ResponseEntity.status(HttpStatus.CREATED).header("path", "/order").body(orderService.createNewOrder(orderRequestDTO));
     }
 

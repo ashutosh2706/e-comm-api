@@ -32,13 +32,19 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(CustomerServiceException.class)
     @ResponseStatus(HttpStatus.SERVICE_UNAVAILABLE)
     public ResponseEntity<Object> handleCustomerServiceException(Exception e, HttpServletRequest request) {
-        return new ResponseEntity<>(createErrorResponse("Customer Service Unavailable", e.getClass().getSimpleName(), HttpStatus.SERVICE_UNAVAILABLE, request), HttpStatus.SERVICE_UNAVAILABLE);
+        return new ResponseEntity<>(createErrorResponse(e.getMessage(), e.getClass().getSimpleName(), HttpStatus.SERVICE_UNAVAILABLE, request), HttpStatus.SERVICE_UNAVAILABLE);
     }
 
     @ExceptionHandler(ProductServiceException.class)
     @ResponseStatus(HttpStatus.SERVICE_UNAVAILABLE)
     public ResponseEntity<Object> handleProductServiceException(Exception e, HttpServletRequest request) {
-        return new ResponseEntity<>(createErrorResponse("Product Service Unavailable", e.getClass().getSimpleName(), HttpStatus.SERVICE_UNAVAILABLE, request), HttpStatus.SERVICE_UNAVAILABLE);
+        return new ResponseEntity<>(createErrorResponse(e.getMessage(), e.getClass().getSimpleName(), HttpStatus.SERVICE_UNAVAILABLE, request), HttpStatus.SERVICE_UNAVAILABLE);
+    }
+
+    @ExceptionHandler(OrderException.class)
+    @ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)
+    public ResponseEntity<Object> handleOrderException(Exception e, HttpServletRequest request) {
+        return new ResponseEntity<>(createErrorResponse(e.getMessage(), e.getClass().getSimpleName(), HttpStatus.UNPROCESSABLE_ENTITY, request), HttpStatus.UNPROCESSABLE_ENTITY);
     }
 
     @ExceptionHandler(Exception.class)

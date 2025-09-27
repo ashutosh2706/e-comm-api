@@ -18,15 +18,16 @@ public class CustomerServiceClient {
     @Autowired
     private RestTemplate restTemplate;
 
-    public Optional<CustomerResponseDTO> findCustomerById(long customerId) throws CustomerServiceException {
+    public CustomerResponseDTO findCustomerById(long customerId) throws CustomerServiceException {
         String requestUrl = customerService + "/" + customerId;
         ResponseEntity<CustomerResponseDTO> response = restTemplate.getForEntity(
                 requestUrl, CustomerResponseDTO.class
         );
-        if (response.getStatusCode() == HttpStatus.INTERNAL_SERVER_ERROR)
+        if (response.getStatusCode().is5xxServerError())
             throw new CustomerServiceException("Customer Service Down");
-        return response.getStatusCode() == HttpStatus.OK && response.getBody() != null ?
-                Optional.of(response.getBody()) :
-                Optional.empty();
+        if (response.getStatusCode().is2xxSuccessful())
+            return response.getBody();
+        // return null for 4xx error
+        return null;
     }
 }
