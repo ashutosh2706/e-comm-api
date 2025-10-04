@@ -36,7 +36,7 @@ public class MessageListener {
     public void messageConsumer1(OrderMessage orderMessage, @Header(KafkaHeaders.RECEIVED_TOPIC) String topic,
                                  @Header(KafkaHeaders.RECEIVED_PARTITION) Integer partitionId) throws MessagingException {
         logger.info("Consumer1 Received: {} from {} partition {}", orderMessage.toString(), topic, partitionId);
-        emailService.sendOrderMail("imashutosh2706@gmail.com", orderMessage);
+//        emailService.sendOrderMail("imashutosh2706@gmail.com", orderMessage);
     }
 
     /// consume message in dlt
