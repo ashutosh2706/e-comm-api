@@ -14,5 +14,6 @@ public class GatewayApplication implements CommandLineRunner {
 	@Override
 	public void run(String... args) throws Exception {
 		System.out.println("API Gateway running...");
+		System.out.println("Spring Version: " + org.springframework.core.SpringVersion.getVersion());
 	}
 }
