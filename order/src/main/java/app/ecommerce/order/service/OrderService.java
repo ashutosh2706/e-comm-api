@@ -110,6 +110,7 @@ public class OrderService {
                 cart.getTotalAmount(),
                 cart.getPaymentMethod(),
                 orderRequestDTO.customerId(),
+                customerResponseDTO.email(),
                 customerResponseDTO.firstName() + " " + customerResponseDTO.lastName(),
                 products
         );
