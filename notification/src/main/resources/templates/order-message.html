@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Confirmation</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+        .email-container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #ffffff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            color: #333;
+        }
+        p {
+            font-size: 16px;
+            line-height: 1.6;
+            color: #555;
+        }
+        .order-details {
+            margin-top: 20px;
+            padding: 10px;
+            background-color: #f9f9f9;
+            border: 1px solid #e0e0e0;
+            border-radius: 5px;
+        }
+        .order-details table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .order-details th, .order-details td {
+            padding: 8px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        .order-details th {
+            background-color: #f2f2f2;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            font-size: 14px;
+            color: #777;
+        }
+    </style>
+</head>
+<body>
+<div class="email-container">
+    <h1>Order Confirmation</h1>
+    <p>Hello, <strong th:text="${CustomerName}"></strong>!</p>
+    <p>Thank you for your order. We're excited to let you know that we've received your order, and it's being processed. Here are the details of your order:</p>
+
+    <div class="order-details">
+        <h3>Order Details</h3>
+        <table>
+            <tr>
+                <th>Customer ID</th>
+                <td th:text="${CustomerId}"></td>
+            </tr>
+            <tr>
+                <th>Total Bill</th>
+                <td th:text="${TotalBill}"></td>
+            </tr>
+            <tr>
+                <th>Payment Method</th>
+                <td th:text="${PaymentMethod}"></td>
+            </tr>
+            <tr>
+                <th>Items Purchased</th>
+                <td>
+                    <ul>
+                        <li th:each="item : ${ItemsPurchased}" th:text="${item}"></li>
+                    </ul>
+                </td>
+            </tr>
+        </table>
+    </div>
+
+    <p>If you have any questions, feel free to contact our support team.</p>
+
+    <div class="footer">
+        <p>&copy; 2025 Your Company Name | All Rights Reserved</p>
+    </div>
+</div>
+</body>
+</html>

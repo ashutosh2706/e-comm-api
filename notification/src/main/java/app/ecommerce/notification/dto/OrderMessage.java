@@ -1,12 +1,9 @@
-package app.ecommerce.order.kafka;
-
-import app.ecommerce.order.common.PaymentMethod;
+package app.ecommerce.notification.dto;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
 import java.util.List;
 
-public record OrderConfirmationMessage (
+public record OrderMessage(
         long cartId,
         String reference,
         BigDecimal totalAmount,

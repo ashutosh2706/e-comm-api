@@ -109,11 +109,12 @@ public class OrderService {
                 cart.getReference(),
                 cart.getTotalAmount(),
                 cart.getPaymentMethod(),
+                orderRequestDTO.customerId(),
                 customerResponseDTO.firstName() + " " + customerResponseDTO.lastName(),
                 products
         );
         // configure DLT in kafka
-        CompletableFuture<SendResult<String, Object>> future =kafkaTemplate.send(kafkaTopic, confirmationMessage);
+        CompletableFuture<SendResult<String, Object>> future =kafkaTemplate.send(kafkaTopic, String.valueOf(confirmationMessage.customerId()), confirmationMessage);
         future.whenComplete((result, exception) -> {
             if(exception == null) {
                 System.out.printf("Sent message=[%s] with offset=[%s]\n", confirmationMessage, result.getRecordMetadata().offset());
@@ -126,12 +127,12 @@ public class OrderService {
                 cart.getCartId(),
                 customerResponseDTO.id(),
                 customerResponseDTO.firstName() + " " + customerResponseDTO.lastName(),
-                totalAmount,
-                orderRequestDTO.amount(),
+                totalAmount,    // actual cost
+                orderRequestDTO.amount(),   // paid amount
                 cart.getReference(),
                 cart.getPaymentMethod(),
                 cart.getCreatedAt(),
-                purchaseResponse
+                purchaseResponse    // list of products purchased
         );
     }
 }
