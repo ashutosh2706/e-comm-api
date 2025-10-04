@@ -1,8 +1,11 @@
 package app.ecommerce.notification;
 
 import app.ecommerce.notification.dto.OrderMessage;
+import app.ecommerce.notification.mail.EmailService;
+import jakarta.mail.MessagingException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.annotation.DltHandler;
 import org.springframework.kafka.annotation.KafkaListener;
@@ -20,6 +23,8 @@ public class MessageListener {
 
     @Value("${app.config.kafka.group_id}")
     private String groupId;
+    @Autowired
+    private EmailService emailService;
     Logger logger = LoggerFactory.getLogger(MessageListener.class);
 
     @KafkaListener(topics = "order-message", groupId = "order-message-consumer")
@@ -29,8 +34,9 @@ public class MessageListener {
             exclude = {NullPointerException.class}
     )
     public void messageConsumer1(OrderMessage orderMessage, @Header(KafkaHeaders.RECEIVED_TOPIC) String topic,
-                                 @Header(KafkaHeaders.RECEIVED_PARTITION) Integer partitionId) {
+                                 @Header(KafkaHeaders.RECEIVED_PARTITION) Integer partitionId) throws MessagingException {
         logger.info("Consumer1 Received: {} from {} partition {}", orderMessage.toString(), topic, partitionId);
+        emailService.sendOrderMail("imashutosh2706@gmail.com", orderMessage);
     }
 
     /// consume message in dlt
