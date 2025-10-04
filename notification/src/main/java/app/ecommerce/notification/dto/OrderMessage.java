@@ -9,6 +9,7 @@ public record OrderMessage(
         BigDecimal totalAmount,
         PaymentMethod paymentMethod,
         long customerId,
+        String customerMail,
         String customerName,
         List<Product> productList
 ) {
