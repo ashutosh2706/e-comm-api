@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
@@ -35,6 +36,7 @@ public class CustomerController {
         }
     }
 
+    @PreAuthorize("hasRole('ROLE_USER')")
     @PutMapping(value = "update", consumes = MediaType.ALL_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> updateCustomer(
             @Valid @RequestBody CustomerRequestDto requestDto,
@@ -52,6 +54,7 @@ public class CustomerController {
     }
 
 
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @GetMapping(value = "all", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> getAllCustomers(
             @RequestParam(value = "page_number", required = false, defaultValue = "1") int page,
@@ -70,6 +73,7 @@ public class CustomerController {
         }
     }
 
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @DeleteMapping(value = "{id}")
     public ResponseEntity<?> deleteById(@PathVariable(name = "id") long customerId) {
         try {
