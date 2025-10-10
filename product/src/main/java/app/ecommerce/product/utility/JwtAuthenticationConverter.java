@@ -1,4 +1,4 @@
-package app.ecommerce.customer.utiity;
+package app.ecommerce.product.utility;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.convert.converter.Converter;
@@ -10,16 +10,16 @@ import org.springframework.security.oauth2.server.resource.authentication.JwtAut
 import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
 import org.springframework.stereotype.Component;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @Component
-public class JwtConverter implements Converter<Jwt, AbstractAuthenticationToken> {
-
+public class JwtAuthenticationConverter implements Converter<Jwt, AbstractAuthenticationToken> {
     private final JwtGrantedAuthoritiesConverter grantedAuthoritiesConverter = new JwtGrantedAuthoritiesConverter();
-    @Value("kc.config.auth-client-id")
-    private String clientId;
 
     @Override
     public AbstractAuthenticationToken convert(Jwt source) {
@@ -35,6 +35,7 @@ public class JwtConverter implements Converter<Jwt, AbstractAuthenticationToken>
             if(client_roles != null && client_roles.containsKey("roles"))
                 roles.addAll((Collection<? extends String>) client_roles.get("roles"));
         }
+
         return roles.stream().map(role -> new SimpleGrantedAuthority(role.trim().toUpperCase())).collect(Collectors.toSet());
     }
 }
