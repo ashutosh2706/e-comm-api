@@ -49,17 +49,20 @@ public class OrderService {
     @Value("${app.config.kafka.topic}")
     private String kafkaTopic;
 
+    // TODO: Make this Async
     @Transactional
-    public Object createNewOrder(OrderRequestDTO orderRequestDTO) throws CustomerServiceException, ProductServiceException, OrderException {
+    public Object createNewOrder(OrderRequestDTO orderRequestDTO, String authHeader) throws CustomerServiceException, ProductServiceException, OrderException {
         // customer service throws 5xx error on invalid customerId - handle this
-        CustomerResponseDTO customerResponseDTO = customerServiceClient.findCustomerById(orderRequestDTO.customerId());
+        // RequestFilter will make sure authorization header is always present and accessToken is not null
+        String accessToken = authHeader.substring(7);
+        CustomerResponseDTO customerResponseDTO = customerServiceClient.findCustomerById(orderRequestDTO.customerId(), accessToken);
         if (customerResponseDTO == null) {
             throw new OrderException("No Customer Found with id: " + orderRequestDTO.customerId());
         }
         // Query product stocks
         List<Long> productIds = new ArrayList<>();
         orderRequestDTO.products().forEach(product -> productIds.add(product.productId()));
-        List<ProductQueryResponse> availableStock =  productServiceClient.queryProductAvailability(productIds);
+        List<ProductQueryResponse> availableStock =  productServiceClient.queryProductAvailability(productIds, accessToken);
         if(availableStock == null) {
             throw new OrderException("Invalid productId found.");
         }
@@ -93,7 +96,7 @@ public class OrderService {
         }
 
         // purchase products if everything satisfies
-        List<ProductPurchaseResponseDTO> purchaseResponse = this.productServiceClient.purchaseProducts(orderRequestDTO.products());
+        List<ProductPurchaseResponseDTO> purchaseResponse = this.productServiceClient.purchaseProducts(orderRequestDTO.products(), accessToken);
 
         Cart cart = cartRepository.save(cartMapper.toCart(orderRequestDTO, totalAmount));
         orderRequestDTO.products().stream().map(purchaseRequestDTO -> orderMapper.toOrder(purchaseRequestDTO, cart)).forEach(order -> orderRepository.save(order));
