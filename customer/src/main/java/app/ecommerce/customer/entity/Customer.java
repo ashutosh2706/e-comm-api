@@ -16,6 +16,17 @@ public class Customer {
     private String lastName;
     @Column(nullable = false, unique = true)
     private String email;
+    @ManyToOne
+    @JoinColumn(name = "roleId", nullable = false)
+    private Role role;
+
+    public Role getRole() {
+        return role;
+    }
+
+    public void setRole(Role role) {
+        this.role = role;
+    }
 
     public long getId() {
         return id;
@@ -51,10 +62,11 @@ public class Customer {
 
     public Customer() {}
 
-    public Customer(long id, String firstName, String lastName, String email) {
+    public Customer(long id, String firstName, String lastName, String email, Role role) {
         this.id = id;
         this.firstName = firstName;
         this.lastName = lastName;
         this.email = email;
+        this.role = role;
     }
 }

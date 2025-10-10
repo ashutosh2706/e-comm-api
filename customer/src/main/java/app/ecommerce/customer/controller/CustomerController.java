@@ -2,12 +2,15 @@ package app.ecommerce.customer.controller;
 
 
 import app.ecommerce.customer.dto.CustomerRequestDto;
+import app.ecommerce.customer.exception.KeyCloakServiceException;
 import app.ecommerce.customer.service.CustomerService;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
@@ -22,21 +25,36 @@ public class CustomerController {
         this.customerService = customerService;
     }
 
-    @PostMapping(value = "new", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<String> addCustomer(@Valid @RequestBody CustomerRequestDto request) {
-        return ResponseEntity.created(URI.create("/customer")).body(customerService.createCustomer(request));
+    @PostMapping(value = "add", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<?> addCustomer(@Valid @RequestBody CustomerRequestDto request) {
+        try {
+            return ResponseEntity.created(URI.create("/customer")).body(customerService.createCustomer(request));
+        } catch (KeyCloakServiceException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
+        } catch (EntityNotFoundException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 
+    @PreAuthorize("hasRole('ROLE_USER')")
     @PutMapping(value = "update", consumes = MediaType.ALL_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> updateCustomer(
             @Valid @RequestBody CustomerRequestDto requestDto,
             @RequestParam(value = "customer_id") long customerId) {
-        return ResponseEntity.ok().body(
-                customerService.updateCustomer(customerId, requestDto)
-        );
+        try{
+            return ResponseEntity.ok().body(
+                    customerService.updateCustomer(customerId, requestDto)
+            );
+        } catch (KeyCloakServiceException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
+        } catch (EntityNotFoundException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+
     }
 
 
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @GetMapping(value = "all", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> getAllCustomers(
             @RequestParam(value = "page_number", required = false, defaultValue = "1") int page,
@@ -55,6 +73,7 @@ public class CustomerController {
         }
     }
 
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @DeleteMapping(value = "{id}")
     public ResponseEntity<?> deleteById(@PathVariable(name = "id") long customerId) {
         try {
@@ -62,6 +81,8 @@ public class CustomerController {
             return ResponseEntity.noContent().build();
         } catch (EntityNotFoundException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (KeyCloakServiceException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
         }
     }
 }
