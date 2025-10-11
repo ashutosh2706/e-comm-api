@@ -26,26 +26,35 @@ public class ProductServiceClient {
     @Autowired
     private RestTemplate restTemplate;
 
-    public List<ProductPurchaseResponseDTO> purchaseProducts(List<ProductPurchaseRequestDTO> purchaseRequestList) throws ProductServiceException {
+    public List<ProductPurchaseResponseDTO> purchaseProducts(List<ProductPurchaseRequestDTO> purchaseRequestList, String jwt) throws ProductServiceException {
 
         HttpHeaders headers = new HttpHeaders();
         headers.set(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE);
         headers.set("x-purchase-key", "123");
+        headers.setBearerAuth(jwt);
         HttpEntity<List<ProductPurchaseRequestDTO>> requestEntity =  new HttpEntity<>(purchaseRequestList, headers);
         ParameterizedTypeReference<List<ProductPurchaseResponseDTO>> responseType = new ParameterizedTypeReference<>() {};
-        ResponseEntity<List<ProductPurchaseResponseDTO>> responseEntity = restTemplate.exchange(productServiceUrl + "/purchase-bulk", HttpMethod.POST, requestEntity, responseType);
+        ResponseEntity<List<ProductPurchaseResponseDTO>> responseEntity = restTemplate.exchange(
+                productServiceUrl + "/purchase-bulk",
+                HttpMethod.POST,
+                requestEntity,
+                responseType
+        );
         if(responseEntity.getStatusCode().is5xxServerError()) {
-            throw new ProductServiceException("Product Service is down");
+            throw new ProductServiceException("Product Service is down. Status: "+responseEntity.getStatusCode().value());
         } if (responseEntity.getStatusCode().is2xxSuccessful()) {
             return responseEntity.getBody();
         }
+        if (responseEntity.getStatusCode().is4xxClientError())
+            throw new ProductServiceException("Product Service request error. Status: "+responseEntity.getStatusCode().value());
         return null;
     }
 
-    public List<ProductQueryResponse> queryProductAvailability(List<Long> productIds) throws ProductServiceException {
+    public List<ProductQueryResponse> queryProductAvailability(List<Long> productIds, String jwt) throws ProductServiceException {
         String requestUrl = productServiceUrl + "/query-products";
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.setBearerAuth(jwt);
         HttpEntity<List<Long>> payload = new HttpEntity<>(productIds, headers);
         ResponseEntity<List<ProductQueryResponse>> responseEntity = restTemplate.exchange(
                 requestUrl,
@@ -57,8 +66,10 @@ public class ProductServiceClient {
         if(responseEntity.getStatusCode().is2xxSuccessful()) {
             return responseEntity.getBody();
         } else if(responseEntity.getStatusCode().is5xxServerError()) {
-            throw new ProductServiceException("Product Service is down");
+            throw new ProductServiceException("Product Service is down. Status: "+responseEntity.getStatusCode().value());
         }
+        if (responseEntity.getStatusCode().is4xxClientError())
+            throw new ProductServiceException("Product Service request error. Status: "+responseEntity.getStatusCode().value());
         return null;
     }
 }

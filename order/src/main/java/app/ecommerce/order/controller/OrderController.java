@@ -24,7 +24,8 @@ public class OrderController {
 
     @PostMapping(value = "new", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> createOrder(@Valid @RequestBody OrderRequestDTO orderRequestDTO, @RequestHeader Map<String, String> headers) throws CustomerServiceException, ProductServiceException, OrderException {
-        return ResponseEntity.status(HttpStatus.CREATED).header("path", "/order").body(orderService.createNewOrder(orderRequestDTO));
+        String authHeader = headers.get("authorization");
+        return ResponseEntity.status(HttpStatus.CREATED).header("path", "/order").body(orderService.createNewOrder(orderRequestDTO, authHeader));
     }
 
 }

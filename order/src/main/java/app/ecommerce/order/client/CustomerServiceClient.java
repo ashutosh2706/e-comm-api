@@ -4,8 +4,7 @@ import app.ecommerce.order.dto.customer.CustomerResponseDTO;
 import app.ecommerce.order.exception.CustomerServiceException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
@@ -18,16 +17,24 @@ public class CustomerServiceClient {
     @Autowired
     private RestTemplate restTemplate;
 
-    public CustomerResponseDTO findCustomerById(long customerId) throws CustomerServiceException {
+    public CustomerResponseDTO findCustomerById(long customerId, String jwt) throws CustomerServiceException {
         String requestUrl = customerService + "/" + customerId;
-        ResponseEntity<CustomerResponseDTO> response = restTemplate.getForEntity(
-                requestUrl, CustomerResponseDTO.class
+        HttpHeaders headers = new HttpHeaders();
+        headers.setBearerAuth(jwt);
+        HttpEntity<Void> requestEntity = new HttpEntity<>(headers);
+        ResponseEntity<CustomerResponseDTO> response = restTemplate.exchange(
+                requestUrl,
+                HttpMethod.GET,
+                requestEntity,
+                CustomerResponseDTO.class
         );
         if (response.getStatusCode().is5xxServerError())
-            throw new CustomerServiceException("Customer Service Down");
+            throw new CustomerServiceException("Customer Service Down. Status: "+response.getStatusCode().value());
         if (response.getStatusCode().is2xxSuccessful())
             return response.getBody();
-        // return null for 4xx error
+        if (response.getStatusCode().is4xxClientError())
+            throw new CustomerServiceException("Customer Service request error. Status: "+response.getStatusCode().value());
+
         return null;
     }
 }
