@@ -78,7 +78,7 @@ public class CustomerService {
 
     public CustomerResponseDto<Customer> getAllCustomer(int page, int pageSize) {
         PageRequest pageRequest = PageRequest.of(page-1, pageSize, Sort.by(Sort.Direction.ASC, "id"));
-        Page<Customer> customersPage = customerRepository.findAll(pageRequest);
+        Page<Customer> customersPage = customerRepository.findAllCustomer(pageRequest);
         return new CustomerResponseDto<>(
                 page, customersPage.getNumberOfElements(), customersPage.getTotalElements(), customersPage.getContent()
         );
