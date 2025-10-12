@@ -100,9 +100,11 @@ public class CustomerService {
     public void deleteCustomer(long customerId) throws KeyCloakServiceException {
         Optional<Customer> optionalCustomer = customerRepository.findById(customerId);
         if(optionalCustomer.isPresent()) {
-            var customerUID = uidRepository.findByCustomerId(optionalCustomer.get().getId()).orElseThrow(() -> new EntityNotFoundException("No customer found with id: "+customerId));
-            keycloakService.deleteUser(customerUID.getUuid());
-            uidRepository.delete(customerUID);
+            Optional<CustomerUid> customerUID = uidRepository.findByCustomerId(optionalCustomer.get().getId());
+            if(customerUID.isPresent()) {
+                keycloakService.deleteUser(customerUID.get().getUuid());
+                uidRepository.delete(customerUID.get());
+            }
             customerRepository.delete(optionalCustomer.get());
             return;
         }
