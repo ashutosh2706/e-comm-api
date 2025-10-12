@@ -12,6 +12,8 @@ import app.ecommerce.customer.repo.CustomerUidRepository;
 import app.ecommerce.customer.utiity.CustomerMapper;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -41,6 +43,7 @@ public class CustomerService {
         this.keycloakService = keycloakService;
     }
 
+    @CacheEvict(value = "customer", allEntries = true)
     @Transactional
     public Object createCustomer(CustomerRequestDto request) throws KeyCloakServiceException {
         Role role = roleRepository.findByRoleId(request.roleId()).orElseThrow(() -> new RuntimeException("No role found with roleId: "+request.roleId()));
@@ -55,6 +58,7 @@ public class CustomerService {
         return uidRepository.save(customerUid);
     }
 
+    @CacheEvict(value = "customer", allEntries = true)
     @Transactional
     public Customer updateCustomer(long customerId, CustomerRequestDto requestDto) throws KeyCloakServiceException {
         Role role = roleRepository.findByRoleId(requestDto.roleId()).orElseThrow(() -> new EntityNotFoundException("No role found with roleId: "+requestDto.roleId()));
@@ -76,6 +80,7 @@ public class CustomerService {
             throw new IllegalArgumentException(String.format("No customer present with customerId: %d", customerId));
     }
 
+    @Cacheable(value = "customer", key = "'page_' + #page + '_size_' + #pageSize")
     public CustomerResponseDto<Customer> getAllCustomer(int page, int pageSize) {
         PageRequest pageRequest = PageRequest.of(page-1, pageSize, Sort.by(Sort.Direction.ASC, "id"));
         Page<Customer> customersPage = customerRepository.findAllCustomer(pageRequest);
@@ -84,10 +89,13 @@ public class CustomerService {
         );
     }
 
+    @Cacheable(value = "customer", key = "#customerId")
     public Customer findByCustomerId(long customerId) {
+        System.out.println("DB called for customerId: " + customerId);
         return customerRepository.findById(customerId).orElseThrow(() -> new EntityNotFoundException(String.format("No customer found with customerId %d", customerId)));
     }
 
+    @CacheEvict(value = "customer", allEntries = true)
     @Transactional
     public void deleteCustomer(long customerId) throws KeyCloakServiceException {
         Optional<Customer> optionalCustomer = customerRepository.findById(customerId);
