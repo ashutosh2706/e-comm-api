@@ -39,7 +39,7 @@ public class ProductService {
 
     public ProductPurchaseResponse purchase(long productId, int quantity) {
         var product = productRepo.findById(productId).orElseThrow(() -> new EntityNotFoundException(String.format("No product found with id %d", productId)));
-        if(product.getAvailable() > 0 && product.getAvailable() <= quantity) {
+        if(product.getAvailable() > 0 && product.getAvailable() < quantity) {
             throw new ProductPurchaseException(String.format("Insufficient stock available for requested product, current stock: %d", product.getAvailable()));
         }
         var currentStock = product.getAvailable();
@@ -68,7 +68,7 @@ public class ProductService {
     }
 
     public List<NewProductResponse> getAll() {
-        return productRepo.findAll().stream().map(productMapper::productToProductResponse).collect(Collectors.toList());
+        return productRepo.findAllProduct().stream().map(productMapper::productToProductResponse).collect(Collectors.toList());
     }
 
     public List<ProductQueryResponse> queryProductsAvailability(List<Long> productIds) {
