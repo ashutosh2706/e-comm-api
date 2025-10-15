@@ -9,6 +9,8 @@ import app.ecommerce.product.repo.CategoryRepo;
 import app.ecommerce.product.repo.ProductRepo;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -25,6 +27,7 @@ public class ProductService {
     @Autowired
     private ProductMapper productMapper;
 
+    @CacheEvict(value = "product", allEntries = true)
     public Object createProduct(ProductRequest request) {
         Category category = categoryRepo.findByCategoryId(request.categoryId()).orElseThrow(() -> new RuntimeException(String.format("Category id %d not found", request.categoryId())));
         Product product = new Product();
@@ -37,6 +40,7 @@ public class ProductService {
         return productMapper.productToProductResponse(p);
     }
 
+    @CacheEvict(value = "product", allEntries = true)
     public ProductPurchaseResponse purchase(long productId, int quantity) {
         var product = productRepo.findById(productId).orElseThrow(() -> new EntityNotFoundException(String.format("No product found with id %d", productId)));
         if(product.getAvailable() > 0 && product.getAvailable() < quantity) {
@@ -48,6 +52,7 @@ public class ProductService {
         return productMapper.productToProductPurchaseResponse(product, quantity);
     }
 
+    @CacheEvict(value = "product", allEntries = true)
     public List<PurchaseResponse> purchaseBulk(List<PurchaseRequest> purchaseRequests) {
         List<PurchaseResponse> responseList = new ArrayList<>();
         purchaseRequests.forEach((purchaseRequest -> {
@@ -61,12 +66,14 @@ public class ProductService {
         return responseList;
     }
 
+    @Cacheable(value = "product", key = "#id")
     public NewProductResponse findProduct(long id) {
         return productRepo.findById(id)
                 .map(productMapper::productToProductResponse)
                 .orElseThrow(() -> new EntityNotFoundException(String.format("No product was found with id %d", id)));
     }
 
+    @Cacheable(value = "product", key = "'all_products'")
     public List<NewProductResponse> getAll() {
         return productRepo.findAllProduct().stream().map(productMapper::productToProductResponse).collect(Collectors.toList());
     }
